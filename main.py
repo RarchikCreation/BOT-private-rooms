@@ -21,14 +21,31 @@ def init_db():
         open("database.db", "w").close()
     with sqlite3.connect("database.db") as conn:
         cursor = conn.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS voice_channels (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            channel_id INTEGER,
-                            owner_id INTEGER,
-                            name TEXT,
-                            created_at TEXT
-                          )''')
+        cursor.execute('''
+                  CREATE TABLE IF NOT EXISTS voice_channels (
+                      id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      channel_id INTEGER UNIQUE,
+                      owner_id INTEGER,
+                      name TEXT,
+                      created_at TEXT,
+                      is_private INTEGER DEFAULT 0,
+                      is_hidden INTEGER DEFAULT 0,
+                      user_limit INTEGER DEFAULT 0
+                  )
+              ''')
+
+        cursor.execute("PRAGMA table_info(voice_channels);")
+        existing_columns = [row[1] for row in cursor.fetchall()]
+
+        if "user_limit" not in existing_columns:
+            cursor.execute("ALTER TABLE voice_channels ADD COLUMN user_limit INTEGER DEFAULT 0;")
+        if "is_private" not in existing_columns:
+            cursor.execute("ALTER TABLE voice_channels ADD COLUMN is_private INTEGER DEFAULT 0;")
+        if "is_hidden" not in existing_columns:
+            cursor.execute("ALTER TABLE voice_channels ADD COLUMN is_hidden INTEGER DEFAULT 0;")
+
         conn.commit()
+
 
 @bot.event
 async def on_ready():
