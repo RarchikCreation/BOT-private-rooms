@@ -11,7 +11,8 @@ intents = disnake.Intents(
     guilds=True,
     messages=True,
     members=True,
-    message_content=True
+    message_content=True,
+    voice_states=True
 )
 
 bot = commands.InteractionBot(intents=intents)
@@ -30,13 +31,16 @@ def init_db():
                       created_at TEXT,
                       is_private INTEGER DEFAULT 0,
                       is_hidden INTEGER DEFAULT 0,
-                      user_limit INTEGER DEFAULT 0
+                      user_limit INTEGER DEFAULT 0,
+                      last_active TEXT
                   )
               ''')
 
         cursor.execute("PRAGMA table_info(voice_channels);")
         existing_columns = [row[1] for row in cursor.fetchall()]
 
+        if "last_active" not in existing_columns:
+            cursor.execute("ALTER TABLE voice_channels ADD COLUMN last_active TEXT;")
         if "user_limit" not in existing_columns:
             cursor.execute("ALTER TABLE voice_channels ADD COLUMN user_limit INTEGER DEFAULT 0;")
         if "is_private" not in existing_columns:
