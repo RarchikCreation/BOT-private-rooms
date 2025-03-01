@@ -24,6 +24,9 @@ class TransferOwnershipCog(commands.Cog):
             cursor.execute("UPDATE voice_channels SET owner_id = ? WHERE channel_id = ?", (member.id, channel.id))
             conn.commit()
 
+            await channel.set_permissions(inter.author, connect=False)
+            await channel.set_permissions(member, connect=True)
+
             await inter.edit_original_response(f"Теперь {member.mention} владелец комнаты {channel.name}.")
 
 

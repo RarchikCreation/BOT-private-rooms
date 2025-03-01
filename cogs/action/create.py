@@ -22,7 +22,11 @@ class CreateCog(commands.Cog):
             return
 
         channel_name = f"Комната {inter.author.display_name}"
-        voice_channel = await category.create_voice_channel(name=channel_name)
+        overwrites = {
+            inter.guild.default_role: disnake.PermissionOverwrite(connect=False),
+            inter.author: disnake.PermissionOverwrite(connect=True)
+        }
+        voice_channel = await category.create_voice_channel(name=channel_name, overwrites=overwrites)
 
         created_at = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         with sqlite3.connect("database.db") as conn:
